@@ -1,0 +1,21 @@
+# Regenerate from the workspace root with: mise run sdk:generate
+# Spec source: https://www.thesportsdb.com/api/spec/v1/openapi.yaml
+
+[generator]
+spec_path = "specs/thesportsdb-v1.yaml"
+output_dir = "src/v1/generated"
+overlays = ["specs/v1.overlay.yaml"]
+effective_spec = "effective.json"
+module_name = "generated"
+
+[features]
+enable_async_client = true
+enable_sse_client = false
+
+[http_client]
+base_url = "https://www.thesportsdb.com/api/v1/json/123"
+timeout_seconds = 30
+max_response_body_bytes = 8388608
+
+[http_client.tracing]
+enabled = false

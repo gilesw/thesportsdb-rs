@@ -1,0 +1,33 @@
+[tools]
+rust = "1.85"
+
+# openapi-to-rust 0.19 needs Rust 1.88, newer than this crate's toolchain, so
+# it is installed from crates.io with its own lockfile into target/tools.
+[tasks."sdk:tool"]
+description = "Install the pinned openapi-to-rust into target/tools"
+run = "mise x rust@1.88 -- cargo install --locked --quiet --root target/tools openapi-to-rust@0.19.0"
+
+[tasks.generate]
+description = "Regenerate both API versions from their specs and overlays"
+depends = ["sdk:tool"]
+run = [
+  "target/tools/bin/openapi-to-rust generate --config openapi-to-rust.v1.toml",
+  "target/tools/bin/openapi-to-rust generate --config openapi-to-rust.v2.toml",
+]
+
+[tasks."generate:check"]
+description = "Fail when either generated client is stale"
+depends = ["sdk:tool"]
+run = [
+  "target/tools/bin/openapi-to-rust generate --config openapi-to-rust.v1.toml --check",
+  "target/tools/bin/openapi-to-rust generate --config openapi-to-rust.v2.toml --check",
+]
+
+[tasks.check]
+description = "Formatting, clippy with warnings denied, tests, and generated-output staleness"
+run = [
+  "cargo fmt --all -- --check",
+  "cargo clippy --all-targets --locked -- -D warnings",
+  "cargo test --locked",
+  "mise run generate:check",
+]

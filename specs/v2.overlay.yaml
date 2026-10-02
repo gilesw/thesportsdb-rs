@@ -1,0 +1,18 @@
+overlay: 1.1.0
+info:
+  title: TheSportsDB v2 response quirks
+  version: 1.0.0
+extends: thesportsdb-v2.yaml
+actions:
+  # Timestamps are sent as "2014-12-29T20:00:00" with no zone, so they are
+  # not RFC 3339 and cannot be decoded as date-time.
+  - target: $..[?@.format == 'date-time'].format
+    remove: true
+  # Every number in a response is sent as a JSON string, for example
+  # "intRound": "19". Path parameters stay integers.
+  - target: $.components.schemas..[?@.type == 'integer']
+    update:
+      type: string
+  # Missing links are sent as "", which is not a URL.
+  - target: $.components.schemas..[?@.format == 'uri' || @.format == 'url'].format
+    remove: true
